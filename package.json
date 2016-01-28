@@ -1,0 +1,32 @@
+{
+  "name": "spider",
+  "version": "1.0.0",
+  "description": "web spider",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wuxingyu1983/spider.git"
+  },
+  "keywords": [
+    "spider"
+  ],
+  "author": "wuxingyu1983@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wuxingyu1983/spider/issues"
+  },
+  "homepage": "https://github.com/wuxingyu1983/spider#readme",
+  "dependencies": {
+    "async": "^1.4.0",
+    "bufferhelper": "^0.2.0",
+    "cheerio": "^0.19.0",
+    "formidable": "^1.0.17",
+    "iconv-lite": "^0.4.11",
+    "mongodb": "^2.0.39",
+    "request": "^2.60.0"
+  }
+}
