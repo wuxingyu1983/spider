@@ -3,6 +3,7 @@
  * Created by wuxingyu on 15/7/27.
  */
 var cheerio = require("cheerio");
+var request = require("request");
 var database = require("./database");
 var html_downloader = require("./htmlDownloader");
 var urlm = require("url");
@@ -72,43 +73,55 @@ function parseAlbum(obj, db, callback) {
 // 处理首页列表、下一页
 function parseHome(url, db, callback) {
     html_downloader.download(url, function(html){
-        var url_obj = urlm.parse(url);
-        var prefix = url_obj.protocol + "//" + url_obj.host + "/";
+        var url_obj = urlm.parse(url, true);
         var $ = cheerio.load(html);
 
         // 遍历本页的 album
         var albums = [];
 
-        $("#tiles li").each(function(i,v){
-            var album_url = prefix + $(v).find("a").attr("href");
-            var album_name = $(v).find("img").attr("alt");
+        $("ul#cata_choose_product li").each(function(i,v){
+          var good_name = $(v).find("div.listDescript a").text();
+          var good_id = $(v).find("div.listbox").attr("data-specseq");
+          var good_image = $(v).find("div.listPic img.fn_img_lazy").attr("data-original");
 
-            var album_obj = new Object();
-            album_obj.name = album_name;
-            album_obj.url = album_url;
+          console.log("the good_name is " + good_name);
+          console.log("the good_id is " + good_id);
+          console.log("the good_image is " + good_image);
 
-            albums.push(album_obj);
-        });
+          // 先插入数据库
 
-        var nxt_url = null;
+          // 下载图片，保存，更新数据库
 
-        // 是否还有下一页
-        $(".nxt").each(function(i, v){
-            nxt_url = prefix + $(v).attr("href");
-        });
-
-        processAlbums(albums, db, function(){
-            // albums 中的已经处理完了
-            if (nxt_url) {
-                // 还有下一页
-                console.log("the next page is " + nxt_url);
-                parseHome(nxt_url, db, callback);
+          // 获取价格，更新数据库
+          request(
+            { method: 'POST',
+            uri:"http://www.feiniu.com/category/get_item_promo/" ,
+            form:{
+                specseq:good_id
+            }
+          },
+          function (error, response, body) {
+            if (!error) {
+              var item = JSON.parse(body);
+              console.log("the it_price is " + item[good_id].it_price);
             }
             else {
-                // 全部处理完了
-                callback();
+              console.log('request error is : '+ error);
             }
+          }
+          );
+
         });
+
+        var page_next = $(".page-link.next").attr("url");
+
+        if (page_next) {
+          console.log("the next page url is " + page_next);
+          parseHome(page_next, db, callback);
+        }
+        else {
+          callback();
+        }
     });
 }
 
